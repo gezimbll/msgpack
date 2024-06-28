@@ -1,4 +1,4 @@
-module github.com/ugorji/go
+module github.com/gezimbll/msgpack
 
 go 1.11
 

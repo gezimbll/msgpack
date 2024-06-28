@@ -8,6 +8,8 @@ import (
 	"errors"
 	"io"
 	"net/rpc"
+
+	"github.com/cgrates/birpc"
 )
 
 var (
@@ -160,23 +162,56 @@ func (c *rpcCodec) ReadResponseBody(body interface{}) error {
 
 // -------------------------------------
 
+func NewMsgPackBirpcCodec(conn io.ReadWriteCloser) birpc.BirpcCodec {
+	return &goRpcCodec{newRPCCodec(conn, &MsgpackHandle{})}
+}
+
+func NewMsgPackServerCodec(conn io.ReadWriteCloser) birpc.ServerCodec {
+	return &goRpcCodec{newRPCCodec(conn, &MsgpackHandle{})}
+}
+
+func NewMsgPackClientCodec(conn io.ReadWriteCloser) birpc.ClientCodec {
+	return &goRpcCodec{newRPCCodec(conn, &MsgpackHandle{})}
+}
+
 type goRpcCodec struct {
 	rpcCodec
 }
+type message struct {
+	Seq           uint64
+	ServiceMethod string
+	Error         string
+}
 
-func (c *goRpcCodec) WriteRequest(r *rpc.Request, body interface{}) error {
+func (c *goRpcCodec) ReadHeader(req *birpc.Request, resp *birpc.Response) error {
+	var msg message
+	if err := c.dec.Decode(&msg); err != nil {
+		return err
+	}
+
+	if msg.ServiceMethod != "" {
+		req.Seq = msg.Seq
+		req.ServiceMethod = msg.ServiceMethod
+	} else {
+		resp.Seq = msg.Seq
+		resp.Error = msg.Error
+	}
+	return nil
+}
+
+func (c *goRpcCodec) WriteRequest(r *birpc.Request, body interface{}) error {
 	return c.write(r, body)
 }
 
-func (c *goRpcCodec) WriteResponse(r *rpc.Response, body interface{}) error {
+func (c *goRpcCodec) WriteResponse(r *birpc.Response, body interface{}) error {
 	return c.write(r, body)
 }
 
-func (c *goRpcCodec) ReadResponseHeader(r *rpc.Response) error {
+func (c *goRpcCodec) ReadResponseHeader(r *birpc.Response) error {
 	return c.read(r)
 }
 
-func (c *goRpcCodec) ReadRequestHeader(r *rpc.Request) error {
+func (c *goRpcCodec) ReadRequestHeader(r *birpc.Request) error {
 	return c.read(r)
 }
 
@@ -188,7 +223,7 @@ func (c *goRpcCodec) ReadRequestBody(body interface{}) error {
 
 // goRpc is the implementation of Rpc that uses the communication protocol
 // as defined in net/rpc package.
-type goRpc struct{}
+//type goRpc struct{}
 
 // GoRpc implements Rpc using the communication protocol defined in net/rpc package.
 //
@@ -223,12 +258,3 @@ type goRpc struct{}
 //	}{conn, bufio.NewReader(conn), bufio.NewWriter(conn)}
 //	var serverCodec = GoRpc.ServerCodec(bufconn, handle)
 //	var clientCodec = GoRpc.ClientCodec(bufconn, handle)
-var GoRpc goRpc
-
-func (x goRpc) ServerCodec(conn io.ReadWriteCloser, h Handle) rpc.ServerCodec {
-	return &goRpcCodec{newRPCCodec(conn, h)}
-}
-
-func (x goRpc) ClientCodec(conn io.ReadWriteCloser, h Handle) rpc.ClientCodec {
-	return &goRpcCodec{newRPCCodec(conn, h)}
-}

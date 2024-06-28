@@ -4749,25 +4749,25 @@ func TestMsgpackRpcSpec(t *testing.T) {
 
 // ----- RPC -----
 
-func TestBincRpcGo(t *testing.T) {
-	doTestCodecRpcOne(t, GoRpc, testBincH, true, 0)
-}
+// func TestBincRpcGo(t *testing.T) {
+// 	doTestCodecRpcOne(t, GoRpc, testBincH, true, 0)
+// }
 
-func TestSimpleRpcGo(t *testing.T) {
-	doTestCodecRpcOne(t, GoRpc, testSimpleH, true, 0)
-}
+// func TestSimpleRpcGo(t *testing.T) {
+// 	doTestCodecRpcOne(t, GoRpc, testSimpleH, true, 0)
+// }
 
-func TestMsgpackRpcGo(t *testing.T) {
-	doTestCodecRpcOne(t, GoRpc, testMsgpackH, true, 0)
-}
+// func TestMsgpackRpcGo(t *testing.T) {
+// 	doTestCodecRpcOne(t, GoRpc, testMsgpackH, true, 0)
+// }
 
-func TestCborRpcGo(t *testing.T) {
-	doTestCodecRpcOne(t, GoRpc, testCborH, true, 0)
-}
+// func TestCborRpcGo(t *testing.T) {
+// 	doTestCodecRpcOne(t, GoRpc, testCborH, true, 0)
+// }
 
-func TestJsonRpcGo(t *testing.T) {
-	doTestCodecRpcOne(t, GoRpc, testJsonH, true, 0)
-}
+// func TestJsonRpcGo(t *testing.T) {
+// 	doTestCodecRpcOne(t, GoRpc, testJsonH, true, 0)
+// }
 
 // ----- OTHERS -----
 
