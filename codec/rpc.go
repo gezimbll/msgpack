@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"errors"
 	"io"
+	"log"
 	"net/rpc"
 
 	"github.com/cgrates/birpc"
@@ -86,6 +87,7 @@ func newRPCCodec2(r io.Reader, w io.Writer, c io.Closer, h Handle) rpcCodec {
 func (c *rpcCodec) write(obj ...interface{}) (err error) {
 	err = c.ready()
 	if err != nil {
+		log.Print(err)
 		return
 	}
 	if c.f != nil {
@@ -100,6 +102,7 @@ func (c *rpcCodec) write(obj ...interface{}) (err error) {
 	for _, o := range obj {
 		err = c.enc.Encode(o)
 		if err != nil {
+			log.Print(err)
 			return
 		}
 		// defensive: ensure a space is always written after each encoding,
@@ -108,10 +111,12 @@ func (c *rpcCodec) write(obj ...interface{}) (err error) {
 		if c.h.isJson() {
 			_, err = c.w.Write(rpcSpaceArr[:])
 			if err != nil {
+				log.Print(err)
 				return
 			}
 		}
 	}
+	log.Print(err)
 	return
 }
 
@@ -126,6 +131,7 @@ func (c *rpcCodec) read(obj interface{}) (err error) {
 			err = c.dec.Decode(obj)
 		}
 	}
+	log.Print(err)
 	return
 }
 
@@ -186,6 +192,7 @@ type message struct {
 func (c *goRpcCodec) ReadHeader(req *birpc.Request, resp *birpc.Response) error {
 	var msg message
 	if err := c.dec.Decode(&msg); err != nil {
+		log.Print(err)
 		return err
 	}
 
